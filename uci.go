@@ -12,7 +12,7 @@ import (
 //The type of the tell parameter is func(text ...string),
 //which means it is a function that takes a variable number of string arguments.
 
-var tell func(text ...string)
+var tell = mainTell //set default tell
 
 func uci(frGUI chan string, myTell func(text ...string)) {
 
@@ -30,26 +30,54 @@ func uci(frGUI chan string, myTell func(text ...string)) {
 	for quit == false {
 		select {
 		case cmd = <-frGUI:
-			case bm = <-frEng
-				handleBm(bm)
-				continue
+		case bm = <-frEng:
+			handleBm(bm)
+			continue
 		}
 		switch cmd {
 		case "uci":
+			handleUci()
+		case "debug on":
+			handleDebugOn()
+		case "isready":
+			handleIsReady()
+		case "setoption":
+			handleSetoption()
 		case "stop":
-		case "quit", "q": handleStop(toEng)
+			handleStop(toEng)
+		case "quit", "q":
 			quit = true
 			continue
 		}
 	}
 }
 
-func handleBm(bm string){
+func handleDebugOn() {
+	tell("info string debug on")
+}
+
+func handleSetoption(option []string) {
+	cmd := strings.Join(option, " ")
+	tell("info string set option", cmd)
+	tell("testing")
+}
+
+func handleUci() {
+	tell("id name Ashish")
+	tell("id author Ashish")
+	tell("uciok")
+}
+
+func handleIsReady() {
+	tell("readyok")
+}
+
+func handleBm(bm string) {
 	tell(bm)
 }
 
-func handleStop(toEng chan string){
-	 toEng <- "stop"
+func handleStop(toEng chan string) {
+	toEng <- "stop"
 }
 
 // go routine waits for commands and sends to uci : standard way to use anonymous func as go routines
@@ -71,6 +99,7 @@ func input() chan string {
 	return line
 }
 
+// mainTell is the tell function run when we not run test
 func mainTell(text ...string) {
 
 	//Empty string
